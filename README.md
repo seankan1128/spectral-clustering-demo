@@ -109,7 +109,3 @@ spectral-clustering-demo/
 ├── requirements.txt
 └── README.md
 ```
-
-## 许可证
-
-MIT License，详见 [LICENSE](LICENSE)。

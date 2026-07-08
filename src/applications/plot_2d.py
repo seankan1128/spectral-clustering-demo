@@ -1,9 +1,14 @@
 import numpy as np
-from core.util import get_scale, spectral_clustering
-from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 
+from core.util import get_scale, spectral_clustering
+from core.demo_config import PROJECT_NAME
+from sklearn.cluster import KMeans
+
+
 def process(x_spectralnet, y_spectralnet, data, params):
+    """Visualize 2D clustering results for the nested C datasets."""
+    print(f'{PROJECT_NAME}: generating 2D visualization...')
     # UNPACK DATA
     x_train, y_train, x_val, y_val, x_test, y_test = data['spectral']['train_and_test']
 

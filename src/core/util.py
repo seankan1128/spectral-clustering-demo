@@ -219,7 +219,7 @@ def print_accuracy(cluster_assignments, y_true, n_clusters, extra_identifier='')
     # get the confusion matrix
     print('confusion matrix{}: '.format(extra_identifier))
     print(confusion_matrix)
-    print('spectralNet{} accuracy: '.format(extra_identifier) + str(np.round(accuracy, 3)))
+    print('clustering accuracy{}: '.format(extra_identifier) + str(np.round(accuracy, 3)))
 
 def get_cluster_sols(x, cluster_obj=None, ClusterClass=None, n_clusters=None, init_args={}):
     '''

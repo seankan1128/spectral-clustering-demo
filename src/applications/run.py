@@ -6,22 +6,25 @@ cc: 15 min
 '''
 
 import sys, os
-# add directories in src/ to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import argparse
 from collections import defaultdict
 
 from core.data import get_data
+from core.demo_config import PROJECT_NAME, VERSION, SUPPORTED_DATASETS, print_banner
 from spectralnet import run_net
 
-# PARSE ARGUMENTS
-parser = argparse.ArgumentParser()
-parser.add_argument('--gpu', type=str, help='gpu number to use', default='')
-parser.add_argument('--dset', type=str, help='gpu number to use', default='mnist')
+parser = argparse.ArgumentParser(
+    description=f'{PROJECT_NAME} — deep spectral clustering on benchmark datasets',
+)
+parser.add_argument('--gpu', type=str, help='GPU device id (empty string for CPU)', default='')
+parser.add_argument('--dset', type=str, choices=SUPPORTED_DATASETS,
+                    help='dataset to cluster', default='mnist')
+parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION}')
 args = parser.parse_args()
 
-# SELECT GPU
+print_banner(args.dset)
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 params = defaultdict(lambda: None)
@@ -167,10 +170,11 @@ elif args.dset == 'cc_semisup':
         }
     params.update(cc_semisup_params)
 
-# LOAD DATA
+# LOAD DATA AND RUN
+print(f'Loading dataset: {args.dset}')
 data = get_data(params)
 
-# RUN EXPERIMENT
+print('Starting spectral clustering pipeline...')
 x_spectralnet, y_spectralnet = run_net(data, params)
 
 if args.dset in ['cc', 'cc_semisup']:

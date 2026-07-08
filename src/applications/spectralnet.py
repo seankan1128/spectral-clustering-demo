@@ -1,26 +1,20 @@
-'''
-spectralnet.py: contains run function for spectralnet
-'''
-import sys, os, pickle
+"""Spectral clustering pipeline: Siamese embedding + spectral network training."""
+
+import os
 import tensorflow as tf
 import numpy as np
-import traceback
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import normalized_mutual_info_score as nmi
 
-import keras.backend as K
-from keras.models import Model, load_model
-from keras.layers import Input, Lambda
-from keras.optimizers import RMSprop
+from keras.layers import Input
 
-from core import train
-from core import costs
 from core import networks
-from core.layer import stack_layers
-from core.util import get_scale, print_accuracy, get_cluster_sols, LearningHandler, make_layer_list, train_gen, get_y_preds
+from core.demo_config import format_evaluation_report
+from core.util import print_accuracy, get_cluster_sols, get_y_preds
 
 def run_net(data, params):
     #
@@ -93,24 +87,28 @@ def run_net(data, params):
             params['spec_lr'], params['spec_drop'], params['spec_patience'],
             params['spec_ne'])
 
-    print("finished training")
+    print('Training complete.')
 
     #
     # EVALUATE
     #
 
-    # get final embeddings
     x_spectralnet = spectral_net.predict(x)
 
-    # get accuracy and nmi
-    kmeans_assignments, km = get_cluster_sols(x_spectralnet, ClusterClass=KMeans, n_clusters=params['n_clusters'], init_args={'n_init':10})
+    kmeans_assignments, _ = get_cluster_sols(
+        x_spectralnet,
+        ClusterClass=KMeans,
+        n_clusters=params['n_clusters'],
+        init_args={'n_init': 10},
+    )
     y_spectralnet, _ = get_y_preds(kmeans_assignments, y, params['n_clusters'])
     print_accuracy(kmeans_assignments, y, params['n_clusters'])
-    from sklearn.metrics import normalized_mutual_info_score as nmi
-    nmi_score = nmi(kmeans_assignments, y)
-    print('NMI: ' + str(np.round(nmi_score, 3)))
 
-    if params['generalization_metrics']:
+    accuracy, _ = get_accuracy_from_assignments(kmeans_assignments, y, params['n_clusters'])
+    nmi_score = nmi(kmeans_assignments, y)
+    print(format_evaluation_report(accuracy, nmi_score, params['n_clusters']))
+
+    if params.get('generalization_metrics'):
         x_spectralnet_train = spectral_net.predict(x_train_unlabeled)
         x_spectralnet_test = spectral_net.predict(x_test)
         km_train = KMeans(n_clusters=params['n_clusters']).fit(x_spectralnet_train)
@@ -118,8 +116,14 @@ def run_net(data, params):
         dist_mat = cdist(x_spectralnet_test, km_train.cluster_centers_)
         closest_cluster = np.argmin(dist_mat, axis=1)
         print_accuracy(closest_cluster, y_test, params['n_clusters'], ' generalization')
-        nmi_score = nmi(closest_cluster, y_test)
-        print('generalization NMI: ' + str(np.round(nmi_score, 3)))
+        gen_accuracy, _ = get_accuracy_from_assignments(closest_cluster, y_test, params['n_clusters'])
+        gen_nmi = nmi(closest_cluster, y_test)
+        print(format_evaluation_report(gen_accuracy, gen_nmi, params['n_clusters'], 'generalization'))
 
     return x_spectralnet, y_spectralnet
+
+
+def get_accuracy_from_assignments(cluster_assignments, y_true, n_clusters):
+    from core.util import get_accuracy
+    return get_accuracy(cluster_assignments, y_true, n_clusters)
 
