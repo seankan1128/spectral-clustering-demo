@@ -1,47 +1,47 @@
 # Spectral Clustering Demo
 
-基于深度神经网络的谱聚类（Spectral Clustering）演示项目。本仓库实现了 SpectralNet 方法：先用 Siamese 网络学习数据表示，再通过谱聚类在嵌入空间中发现簇结构。
+A demonstration project for deep spectral clustering using neural networks. This repository implements the SpectralNet approach: a Siamese network first learns data representations, then spectral clustering discovers cluster structure in the embedding space.
 
-参考论文：[SpectralNet: Spectral Clustering using Deep Neural Networks](https://openreview.net/pdf?id=HJ_aoCyRZ)
+Paper reference: [SpectralNet: Spectral Clustering using Deep Neural Networks](https://openreview.net/pdf?id=HJ_aoCyRZ)
 
 ![nested C dataset clustering example](https://user-images.githubusercontent.com/9156971/34493923-1abbabe8-efbc-11e7-8788-66c62bc91f4d.png)
 
-## 功能概览
+## Features
 
-- 在 MNIST、Reuters、嵌套 C 数据集上运行谱聚类
-- 支持半监督与带噪声场景
-- 可扩展至自定义数据集
+- Run spectral clustering on MNIST, Reuters, and the nested C dataset
+- Support for semi-supervised and noisy scenarios
+- Extensible to custom datasets
 
-## 环境要求
+## Requirements
 
 - Python 3.x
 - TensorFlow 1.15
 - Keras 2.3
 
-安装依赖：
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-macOS 下载 Reuters 数据集还需安装 `wget`：
+On macOS, `wget` is also required to download the Reuters dataset:
 
 ```bash
 brew install wget
 ```
 
-## 快速开始
+## Quick Start
 
-### 内置数据集
+### Built-in datasets
 
 ```bash
 cd src/applications
 python run.py --gpu=0 --dset=mnist
 ```
 
-可选数据集：`mnist` | `reuters` | `cc` | `cc_semisup`
+Available datasets: `mnist` | `reuters` | `cc` | `cc_semisup`
 
-### Reuters 数据预处理
+### Reuters preprocessing
 
 ```bash
 cd data/reuters
@@ -49,9 +49,9 @@ cd data/reuters
 python make_reuters.py
 ```
 
-### 自定义数据集
+### Custom dataset
 
-向 `src/core/data.py` 中的 `get_data` 传入 `(x_train, x_test, y_train, y_test)`，配置超参数后调用 `spectralnet.run()`。完整示例见下方。
+Pass `(x_train, x_test, y_train, y_test)` to `get_data` in `src/core/data.py`, configure hyperparameters, then call `run_net()`. See the example below.
 
 ```python
 import sys
@@ -95,17 +95,17 @@ data = get_data(params, (x_train, x_test, y_train, y_test))
 x_spectralnet, y_spectralnet = run_net(data, params)
 ```
 
-超参数说明见 `src/applications/run.py`。
+See `src/applications/run.py` for hyperparameter details.
 
-## 项目结构
+## Project structure
 
 ```
 spectral-clustering-demo/
-├── data/reuters/          # Reuters 数据集脚本
+├── data/reuters/          # Reuters dataset scripts
 ├── src/
-│   ├── applications/      # 入口与运行脚本
-│   ├── core/              # 网络、训练与数据处理
-│   └── pretrain_weights/  # 预训练权重配置
+│   ├── applications/      # Entry points and run scripts
+│   ├── core/              # Networks, training, and data processing
+│   └── pretrain_weights/  # Pretrained weight configs
 ├── requirements.txt
 └── README.md
 ```
